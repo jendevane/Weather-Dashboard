@@ -2,7 +2,7 @@ var cityInput = document.querySelector('#city-input');
 var cityBtn = document.querySelector('#search-btn');
 var cityNameEl = document.querySelector('#city-name');
 var cityArr = [];
-var apiKey = 'e4ab7318fab329c7de8c4fd9dd5056d7'; // please enter API Key here
+var apiKey = 'bf4b560fa355ac4f979a5132678338df'; // please enter API Key here
 
 var formHandler = function(event) {
     // formats city name
@@ -135,3 +135,54 @@ var fiveDayForecast = function(forecast) {
         humiditySpan.textContent = forecast.daily[i].humidity;
     }
 }
+var saveCity = function (city) {
+    for (var i = 0; i < cityArr.length; i++) {
+        if (city === cityArr[i]) {
+            cityArr.splice(i, 1);
+        }
+    }
+    cityArr.push(city);
+    localStorage.setItem('cities', JSON.stringify(cityArr));
+}
+var loadCities = function () {
+    cityArr = JSON.parse(localStorage.getItem('cities'));
+    
+
+    if (!cityArr) {
+        cityArr = []
+        return false;
+    
+    } else if (cityArr.length > 5) {
+        
+        cityArr.shift();
+    }
+    var recentCities = document.querySelector('#recent-cities');
+    var cityListUl = document.createElement('ul');
+    cityListUl.className = 'list-group list-group-flush city-list';
+    recentCities.appendChild(cityListUl);
+
+    for (var i = 0; i < cityArr.length; i++) {
+        var cityListItem = document.createElement('button');
+        cityListItem.setAttribute('type', 'button');
+        cityListItem.className = 'list-group-item';
+        cityListItem.setAttribute('value', cityArr[i]);
+        cityListItem.textContent = cityArr[i];
+        cityListUl.prepend(cityListItem);
+    }
+
+    varCityList = document.querySelector('.city-list');
+    cityListUl.addEventListener('click', selectRecent)
+    
+}
+var selectRecent = function (event) {
+    var clickedCity = event.target.getAttribute('value')
+    getCoords(clickedCity);
+}
+loadCities();
+cityBtn.addEventListener('click', formHandler)
+
+cityInput.addEventListener('keyup', function (event) {
+    if (event.keyCode === 13) {
+        cityBtn.click();
+    }
+});
