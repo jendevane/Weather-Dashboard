@@ -24,8 +24,8 @@ var formHandler = function(event) {
 
 // uses 'current weather api' to fetch latitude and longitude
 var getCoords = function(city) {
-    var currentWeatherApi = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`;
 
+var currentWeatherApi = `https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={part}&appid={bf4b560fa355ac4f979a5132678338df}`
     fetch(currentWeatherApi).then(function(response) {
         if (response.ok) {
             response.json().then(function(data) {
@@ -49,35 +49,42 @@ var getCoords = function(city) {
         alert('Unable to load weather.');
     })
 }
-var getCityForecast = function (city, lon, lat) {
 
-    var oneCallApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${apiKey}`;
-    fetch(oneCallApi).then(function (response) {
+// uses latitude and longitude to fetch current weather and five-day forecast
+var getCityForecast = function(city, lon, lat) {
+    var oneCallApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${bf4b560fa355ac4f979a5132678338df}`;
+    fetch(oneCallApi).then(function(response) {
         if (response.ok) {
-            response.json().then(function (data) {
-                cityNameEl.textContent = '${ city } (${ moment().format("M/D/YYYY") })';
+            response.json().then(function(data) {
+
+                // identifies city name in forecast
+                cityNameEl.textContent = `${city} (${moment().format("M/D/YYYY")})`; 
+
                 console.log(data)
 
-                currentForcast(data);
-                fiveDayForcast(data);
-
-
+                currentForecast(data);
+                fiveDayForecast(data);
             });
         }
-    });
+    })
 }
-var displayTemp = function (element, tempature) {
-    var tempEL = document.querySelector(element)
-    var elementText = Math.round(tempature);
-    tempEL.textContent = elementText;
+
+// helper function to select HTML element and display rounded temperature
+var displayTemp = function(element, temperature) {
+    var tempEl = document.querySelector(element);
+    var elementText = Math.round(temperature);
+    tempEl.textContent = elementText;
 }
-var currentForcast = function (forecast) {
-    var forecastEl = document.querySelector('city-forecast');
+
+// displays current forecast
+var currentForecast = function(forecast) {
+    
+    var forecastEl = document.querySelector('.city-forecast');
     forecastEl.classList.remove('hide');
 
-    var weatherIconEl = document.querySelector('#today-icon')
+    var weatherIconEl = document.querySelector('#today-icon');
     var currentIcon = forecast.current.weather[0].icon;
-    weatherIconEl.setAttribute('src', 'http://openweathermap.org/img/wn/${currentIcon}.png');
+    weatherIconEl.setAttribute('src', `http://openweathermap.org/img/wn/${currentIcon}.png`);
     weatherIconEl.setAttribute('alt', forecast.current.weather[0].main)
 
     displayTemp('#current-temp', forecast.current['temp']);
@@ -86,20 +93,22 @@ var currentForcast = function (forecast) {
     displayTemp('#current-low', forecast.daily[0].temp.min);
 
     var currentConditionEl = document.querySelector('#current-condition');
-    currentConditionEl.textcontent = forecast.current.weather[0].description
+    currentConditionEl.textContent = forecast.current.weather[0].description
         .split(' ')
         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
         .join(' ');
 
-
     var currentHumidityEl = document.querySelector('#current-humidity');
     currentHumidityEl.textContent = forecast.current['humidity'];
-    var currentWindEl = document.querySelector('#current-wind-speed');
-    currentWindEl.textcontent = forecast.current['wind-speed'];
-    var uvEl = document.querySelector('#current-wind-speed')
-    var currentUvi = forecast.current["uvi"];
-    Uvi.textContent = currentUvi;
 
+    var currentWindEl = document.querySelector('#current-wind-speed')
+    currentWindEl.textContent = forecast.current['wind_speed'];
+
+    var uviEl = document.querySelector('#current-uvi')
+    var currentUvi = forecast.current['uvi'];
+    uviEl.textContent = currentUvi;
+
+    // styles UV index
     switch (true) {
         case (currentUvi <= 2):
             uviEl.className = 'badge badge-success';
@@ -107,15 +116,16 @@ var currentForcast = function (forecast) {
         case (currentUvi <= 5):
             uviEl.className = 'badge badge-warning';
             break;
-        case (currentUvi <= 7):
-            uviEl.className = "badge badge-danger";
+        case (currentUvi <=7):
+            uviEl.className = 'badge badge-danger';
             break;
         default:
             uviEl.className = 'badge text-light';
             uviEl.setAttribute('style', 'background-color: #553C7B');
-
     }
 }
+
+// display five day forecast
 var fiveDayForecast = function(forecast) { 
     
     for (var i = 1; i < 6; i++) {
@@ -135,27 +145,33 @@ var fiveDayForecast = function(forecast) {
         humiditySpan.textContent = forecast.daily[i].humidity;
     }
 }
-var saveCity = function (city) {
+
+// saves cities into local storage
+var saveCity = function(city) {
+
+    // prevents duplicate city from being saved and moves it to end of array
     for (var i = 0; i < cityArr.length; i++) {
         if (city === cityArr[i]) {
             cityArr.splice(i, 1);
         }
     }
+
     cityArr.push(city);
     localStorage.setItem('cities', JSON.stringify(cityArr));
 }
-var loadCities = function () {
+
+// loads cities from local storage
+var loadCities = function() {
     cityArr = JSON.parse(localStorage.getItem('cities'));
-    
 
     if (!cityArr) {
-        cityArr = []
+        cityArr = [];
         return false;
-    
     } else if (cityArr.length > 5) {
-        
+        // saves only the five most recent cities
         cityArr.shift();
     }
+
     var recentCities = document.querySelector('#recent-cities');
     var cityListUl = document.createElement('ul');
     cityListUl.className = 'list-group list-group-flush city-list';
@@ -170,18 +186,21 @@ var loadCities = function () {
         cityListUl.prepend(cityListItem);
     }
 
-    varCityList = document.querySelector('.city-list');
-    cityListUl.addEventListener('click', selectRecent)
-    
+    var cityList = document.querySelector('.city-list');
+    cityList.addEventListener('click', selectRecent)
 }
-var selectRecent = function (event) {
-    var clickedCity = event.target.getAttribute('value')
+
+var selectRecent = function(event) {
+    var clickedCity = event.target.getAttribute('value');
+
     getCoords(clickedCity);
 }
+
 loadCities();
 cityBtn.addEventListener('click', formHandler)
 
-cityInput.addEventListener('keyup', function (event) {
+// searches for city on ENTER key
+cityInput.addEventListener('keyup', function(event) {
     if (event.keyCode === 13) {
         cityBtn.click();
     }
