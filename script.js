@@ -91,4 +91,47 @@ var currentForcast = function (forecast) {
         .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
         .join(' ');
 
+
+    var currentHumidityEl = document.querySelector('#current-humidity');
+    currentHumidityEl.textContent = forecast.current['humidity'];
+    var currentWindEl = document.querySelector('#current-wind-speed');
+    currentWindEl.textcontent = forecast.current['wind-speed'];
+    var uvEl = document.querySelector('#current-wind-speed')
+    var currentUvi = forecast.current["uvi"];
+    Uvi.textContent = currentUvi;
+
+    switch (true) {
+        case (currentUvi <= 2):
+            uviEl.className = 'badge badge-success';
+            break;
+        case (currentUvi <= 5):
+            uviEl.className = 'badge badge-warning';
+            break;
+        case (currentUvi <= 7):
+            uviEl.className = "badge badge-danger";
+            break;
+        default:
+            uviEl.className = 'badge text-light';
+            uviEl.setAttribute('style', 'background-color: #553C7B');
+
+    }
+}
+var fiveDayForecast = function(forecast) { 
+    
+    for (var i = 1; i < 6; i++) {
+        var dateP = document.querySelector('#date-' + i);
+        dateP.textContent = moment().add(i, 'days').format('M/D/YYYY');
+
+        var iconImg = document.querySelector('#icon-' + i);
+        var iconCode = forecast.daily[i].weather[0].icon;
+        iconImg.setAttribute('src', `http://openweathermap.org/img/wn/${iconCode}.png`);
+        iconImg.setAttribute('alt', forecast.daily[i].weather[0].main);
+
+        displayTemp('#temp-' + i, forecast.daily[i].temp.day);
+        displayTemp('#high-' + i, forecast.daily[i].temp.max);
+        displayTemp('#low-' + i, forecast.daily[i].temp.min);
+
+        var humiditySpan = document.querySelector('#humidity-' + i);
+        humiditySpan.textContent = forecast.daily[i].humidity;
+    }
 }
