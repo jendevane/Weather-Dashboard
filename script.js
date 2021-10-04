@@ -25,7 +25,7 @@ var formHandler = function(event) {
 // uses 'current weather api' to fetch latitude and longitude
 var getCoords = function(city) {
 
-var currentWeatherApi = `https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude={part}&appid={bf4b560fa355ac4f979a5132678338df}`
+    var currentWeatherApi = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`
     fetch(currentWeatherApi).then(function(response) {
         if (response.ok) {
             response.json().then(function(data) {
@@ -52,7 +52,9 @@ var currentWeatherApi = `https://api.openweathermap.org/data/2.5/onecall?lat={la
 
 // uses latitude and longitude to fetch current weather and five-day forecast
 var getCityForecast = function(city, lon, lat) {
-    var oneCallApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${bf4b560fa355ac4f979a5132678338df}`;
+   
+var oneCallApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&units=imperial&exclude=minutely,hourly,alerts&appid=${apiKey}`;
+ 
     fetch(oneCallApi).then(function(response) {
         if (response.ok) {
             response.json().then(function(data) {
